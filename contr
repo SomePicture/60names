@@ -1,0 +1,360 @@
+@@ -0,0 +1,359 @@
+var _userConnection = UserConnection;
+
+SqlConnectionStringBuilder csb = new SqlConnectionStringBuilder();
+csb.DataSource = "CMOWSCRMSTB1";
+csb.InitialCatalog = "SiclidData";
+csb.IntegratedSecurity = true;
+
+SqlConnectionStringBuilder csbnow = new SqlConnectionStringBuilder();
+csb.DataSource = "CMOWSCRMSTB1";
+csb.InitialCatalog = "bnpCRM-Orion";
+csb.IntegratedSecurity = true;
+
+//const
+Int64 contractCounter = 0;
+Guid WherePTSGuid;
+Guid TimerProduct = new Guid("BC8688D0-1404-4D0B-BF17-9CB84E033B2A");
+Guid StatusDossierGuid;
+Guid CodeProductGuid;
+
+//string TIME
+string ValString = "";
+string ValString2= "";
+string ValString3= "";
+string ValString4= "";
+string ValString5= "";
+string CurString = "Рубль";
+
+
+Guid ParameterTypeSumma		= new Guid("361E40AE-F36B-1410-B285-00155D06C515");
+Guid ParameterTypeCurrency	= new Guid("FDB211DA-F36B-1410-D094-1C6F65E24BE8");
+Guid ParameterTypeGodStavka = new Guid("FEB71216-F46B-1410-8E8B-E0CB4EC6147E");
+Guid ParameterTypeDlitelMes = new Guid("A16C8C9A-48B9-4785-BA86-E92DF74136D5");
+Guid ParameterTypeInsurance = new Guid("CD5E9F57-106D-48ED-8572-A0239E51E394");
+Guid ParameterTypeMinPay    = new Guid("FA7592C8-8CBA-437E-ABEF-864C3C4AB7B7");
+
+Guid BankAccTypeGuid = new Guid("B087D63A-EB21-41EA-9CFA-4E8F2374D45D"):
+Guid BankAccStatusGuid = new Guid("26AB4206-F46B-1410-2382-E0CB4EC6147E");
+
+CurrencyCodeGuid = new Guid("5fb76920-53e6-df11-971b-001d60e938c6");
+//DATETIME TIME NOW
+
+
+using (SqlConnection MainConnection = new SqlConnection(csb.ConnectionString))
+{
+    MainConnection.Open();
+
+	using (SqlCommand incontr = new SqlCommand("select * from ContractToCRM", MainConnection))
+			{
+				incontr.Connection = MainConnection;
+				incontr.ExecuteNonQuery();
+				using (SqlDataReader reader = incontr.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						contractCounter++;
+
+						//Config ID
+						Guid Id = Guid.NewGuid();
+
+						decimal ExternalID = reader.GetDecimal(0);
+						decimal DossierID = reader.GetDecimal(1);
+						DateTime CreateDate = reader.GetDateTime(2);
+						DateTime ModificDate = reader.GetDateTime(3);
+						string StatusDossier reader.GetString(4);
+						decimal CodeProduct = reader.GetDecimal(2);
+						decimal GodStavka = reader.GetDecimal(2);
+						int DlitMesContr = reader.GetInt32(3);			
+						decimal PSK reader.GetDecimal(4); //пропустил!!
+						decimal sumInsurance = reader.GetDecimal(0);
+						string currency = reader.GetString(1); //Есть еще '   ' , а обычно 'RUB'
+						decimal MinMonthPay = reader.GetDecimal(2);
+						decimal ContrCRD = reader.GetDecimal(3);  //tdprmcrd == CRD
+						decimal ContrSREC reader.GetDecimal(4);
+						decimal ContrCCAP = reader.GetDecimal(0);
+						DateTime VipuskPTS = reader.GetDateTime(2); //проверку на ("1900-01-01") //пропустил!!
+						DateTime DatePodpisContr = reader.GetDateTime(3);
+						string RangClient reader.GetString(4);
+						decimal NumberContrTELEMATIC = reader.GetDecimal(0);
+						string NumberExpenseDiasoft = reader.GetString(1);
+						string PTSNumber = reader.GetString(2);
+						DateTime PTSpoluch = reader.GetDateTime(3);  //Дата получения банком //проверку на ("1900-01-01")
+						DateTime PTSregistr = reader.GetDateTime(3); //проверку на ("1900-01-01")
+						if (!reader.IsDBNull(21)) {
+							string WherePTS reader.GetString(4);  //проверку на Null при вставке
+						} else {
+							WherePTS = String.Empty;
+						}
+						decimal PriceCar = reader.GetDecimal(0);
+						decimal SumCredit = reader.GetDecimal(1); //Сумма Кредита!	
+						//insert VehicleType (Id,CreatedOn,CreatedById,ModifiedOn,ModifiedById,Name) values (NewID(),'2012-02-08 16:07:01.0000000','22C5540C-D9B1-49EF-8EB7-72419B78E57C','2012-02-08 16:07:01.0000000','22C5540C-D9B1-49EF-8EB7-72419B78E57C','Нет данных')
+						string MarqueCAR reader.GetString(4);
+						string ModeleCAR reader.GetString(4);
+						string DateCAR reader.GetString(4); //год выпуска
+						DateTime DateRegCAR = reader.GetDateTime(2); //проверку на ("1900-01-01")
+						string VINCAR reader.GetString(4);
+						DateTime InsuranceStartDATE = reader.GetDateTime(3); //начала действия страховки по авто
+						decimal InsuranceSum = reader.GetDecimal(0); //сумма страховки
+						string NumberInsurance reader.GetString(4);
+						string NameInsuranceComp reader.GetString(4);
+						
+						
+						//IF TIME!!
+						if (WherePTS == "D"){
+								WherePTSGuid = new Guid("3b14d941-99b0-4f28-bf78-edffbbc429d2");
+							} else if (WherePTS == "I") {
+								WherePTSGuid = new Guid("7698cdb9-11d6-4c55-b17f-66aa8e4442e5");
+							} else if (WherePTS == "C") {
+								WherePTSGuid = new Guid("8add074c-8687-45c9-b712-bbdff3f31081");
+							} else if (WherePTS == "A") {
+								WherePTSGuid = new Guid("d3c23a53-7044-40ed-adba-adc3ab2fea5d");
+							}else {
+								WherePTSGuid = Guid.Empty;
+							}		
+							
+						if (StatusDossier == "ENC"){
+								StatusDossierGuid = new Guid("3CC236CC-F573-409D-B460-B00EFC73FE11");
+								//StatusDossierGuid = new Guid("4F8F12A0-5211-40E9-AE51-E869E2E91C9B");
+							} else if (StatusDossier == "RET") {
+								StatusDossierGuid = new Guid("0814D92E-0C8E-4C89-A9DE-4C5E17991965");
+								//StatusDossierGuid = new Guid("B8828991-5AB9-4286-981B-DC12C6C2669A");
+							} else if (StatusDossier == "ASM") {
+								StatusDossierGuid = new Guid("7D7992AC-E43E-430D-B932-8F6CA2ECA377");
+								//StatusDossierGuid = new Guid("169789DA-2FBA-473D-B1A7-822DD79AF24C");
+							} else if (StatusDossier == "PEC") {
+								StatusDossierGuid = new Guid("EDF14717-BD01-4ACC-A949-18EB457D195E");
+								//StatusDossierGuid = new Guid("415B08E8-2E97-4DE1-B3F6-790358972454");
+							} else if (StatusDossier == "RBT") {
+								StatusDossierGuid = new Guid("645BCDE9-A9D2-4D19-9E21-30AEB21D99C0");
+								//StatusDossierGuid = new Guid("F2C15AD1-A904-4D31-95B1-E0CED74A4737");
+							} else if (StatusDossier == "SAN") {
+								StatusDossierGuid = new Guid("645BCDE9-A9D2-4D19-9E21-30AEB21D99C0");
+								//StatusDossierGuid = new Guid("F2C15AD1-A904-4D31-95B1-E0CED74A4737");
+							} else if (StatusDossier == "SOL") {
+								StatusDossierGuid = new Guid("645BCDE9-A9D2-4D19-9E21-30AEB21D99C0");
+								//StatusDossierGuid = new Guid("F2C15AD1-A904-4D31-95B1-E0CED74A4737");
+							} else if (StatusDossier == "SCX") {
+								StatusDossierGuid = new Guid("645BCDE9-A9D2-4D19-9E21-30AEB21D99C0");
+								//StatusDossierGuid = new Guid("F2C15AD1-A904-4D31-95B1-E0CED74A4737");
+							} else if (StatusDossier == "PP") {
+								StatusDossierGuid = new Guid("645BCDE9-A9D2-4D19-9E21-30AEB21D99C0");
+								//StatusDossierGuid = new Guid("F2C15AD1-A904-4D31-95B1-E0CED74A4737");
+							} else if (StatusDossier == "SLD") {
+								StatusDossierGuid = new Guid("868B2F80-B042-41E3-86C4-00CCA18230E6");
+								//StatusDossierGuid = new Guid("464C4FB9-74F3-455C-8A76-490943DE2CFC");
+							} else if (StatusDossier == "RCX") {
+								StatusDossierGuid = new Guid("FF8DC0E3-73F7-4D5A-84EE-1FAC7C16DCA1");
+								//StatusDossierGuid = new Guid("7E3A4693-7EF0-4437-B311-EE1880C99F7B");
+							} else if (StatusDossier == "ECX") {
+								StatusDossierGuid = new Guid("58A69CAC-2D91-467B-A455-74B8ACC8FEFC");
+								//StatusDossierGuid = new Guid("1CD25591-7BA0-41E4-B929-623903C6FD6A");
+							} else if (StatusDossier == "SS") {
+								StatusDossierGuid = new Guid("645BCDE9-A9D2-4D19-9E21-30AEB21D99C0");
+								//StatusDossierGuid = new Guid("F2C15AD1-A904-4D31-95B1-E0CED74A4737");
+							} else if (StatusDossier == "ANN") {
+								StatusDossierGuid = new Guid("D66B03E5-2B48-4178-BC9F-6FBA54E129A9");
+								//StatusDossierGuid = new Guid("751C5374-3F09-487E-9246-2B8DF307C738");
+							} else if (StatusDossier == "FIN") {
+								StatusDossierGuid = new Guid("64951B8E-DCBC-4333-A09B-62D8A21F684A");
+								//StatusDossierGuid = new Guid("015C89E1-5365-4BB5-8252-1217AD3DDDB0");
+							} else if (StatusDossier == "INS") {
+								StatusDossierGuid = new Guid("64951B8E-DCBC-4333-A09B-62D8A21F684A");
+								//StatusDossierGuid = new Guid("015C89E1-5365-4BB5-8252-1217AD3DDDB0");
+							} else if (StatusDossier == "REF") {
+								StatusDossierGuid = new Guid("9E0FE1B8-CFD9-4C9B-AD66-E1C69639C43B");
+								//StatusDossierGuid = new Guid("EFF3CCAB-837E-47DC-B9BA-A607806540D8");
+							} else {
+								StatusDossierGuid = Guid.Empty;
+							}
+							
+							
+							if (CodeProduct == 203110210){
+								CodeProductGuid = new Guid("7456476c-5756-4a94-89ab-928cbdac589e");
+								//CodeProductGuid = new Guid("c00a41d5-2385-469a-ab69-964281b208b9");
+							} else if (CodeProduct == 203110211) {
+								CodeProductGuid = new Guid("d14e20c8-4ff5-4758-929a-b5c0ce7c5e17");
+								//CodeProductGuid = new Guid("d14e20c8-4ff5-4758-929a-b5c0ce7c5e17");
+							} else if (CodeProduct == 203110372) {
+								CodeProductGuid = new Guid("bc8688d0-1404-4d0b-bf17-9cb84e033b2a");
+								//CodeProductGuid = new Guid("bc8688d0-1404-4d0b-bf17-9cb84e033b2a");
+							} else {
+								CodeProductGuid = Guid.Empty;
+							}	
+								
+						
+						
+				SqlConnection conn2 = new SqlConnection(csbnow.ConnectionString);
+					{
+						conn2.Open();
+
+						SqlCommand inrd = new SqlCommand("SELECT Id FROM Contact"
+							+ " Where ExternalID = @ExternalID AND SiclidRang = '1'", conn2);
+						inrd.Connection = conn2;
+						inrd.Parameters.AddWithValue("@ExternalID", ExternalID);
+						var ClientGuid = inrd.ExecuteScalar();
+						if (ClientGuid == null) {
+							ClientGuid = Guid.Empty;
+						}
+						
+						
+						SqlCommand inrd2 = new SqlCommand("SELECT Id FROM Contact"
+							+ " Where ExternalID = @InstitutionID", conn2);
+						inrd2.Connection = conn2;
+						inrd2.Parameters.AddWithValue("@InstitutionID", InstitutionID);
+						var ClientGuid = inrd2.ExecuteScalar();
+						if (ClientGuid == null) {
+							ClientGuid = Guid.Empty;
+						}
+						
+						
+						Entity Contract = UserConnection.EntitySchemaManager.GetInstanceByName("Contract").CreateEntity(UserConnection);
+									Contract.SetDefColumnValues();
+									Contract.SetColumnValue("Id", Id);
+									Contract.SetColumnValue("IntegrationDiasoftClientID", ExternalID);
+									Contract.SetColumnValue("ExternalID", DossierID);
+									Contract.SetColumnValue("ContactId", ClientGuid);
+									Contract.SetColumnValue("CreatedOn", CreateDate);
+									Contract.SetColumnValue("ModifiedOn", ModificDate);
+									Contract.SetColumnValue("BankingServiceId", CodeProductGuid);
+									Contract.SetColumnValue("StatusId", StatusDossier);	
+									Contract.SetColumnValue("PlannedPaymentsCRD", ContrCRD);
+									Contract.SetColumnValue("PlannedPaymentsSREC", ContrSREC);
+									Contract.SetColumnValue("PlannedPaymentsSRECCAP", ContrCCAP);
+									Contract.SetColumnValue("SignedOn", DatePodpisContr);
+									Contract.SetColumnValue("VCONumber", PTSNumber);
+									if (PTSpoluch != "1900-01-01"){
+										Contact.SetColumnValue("VCODateReceived", PTSpoluch);
+									} else {}
+									if (PTSregistr != "1900-01-01"){
+										Contact.SetColumnValue("VCORegisteredAt", PTSregistr);
+									} else {}
+									if (WherePTS != String.Empty){
+										Contact.SetColumnValue("VCOLocation", WherePTSGuid);
+									} else {}
+									Contract.SetColumnValue("BankingServiceId", CodeProductGuid);
+									Contract.SetColumnValue("Id", Id);
+									Contract.SetColumnValue("IntegrationDiasoftClientID", ExternalID);
+									Contract.SetColumnValue("ExternalID", DossierID);
+									Contract.SetColumnValue("ContactId", ClientGuid);
+									Contract.SetColumnValue("CreatedOn", CreateDate);
+									Contract.SetColumnValue("ModifiedOn", ModificDate);
+									Contract.SetColumnValue("BankingServiceId", CodeProductGuid);
+									Contract.SetColumnValue("Id", Id);
+									Contract.SetColumnValue("IntegrationDiasoftClientID", ExternalID);
+									Contract.SetColumnValue("ExternalID", DossierID);
+									Contract.SetColumnValue("ContactId", ClientGuid);
+									Contract.SetColumnValue("CreatedOn", CreateDate);
+									Contract.SetColumnValue("ModifiedOn", ModificDate);
+									Contract.SetColumnValue("BankingServiceId", CodeProductGuid);
+									
+						Contract.Save();
+									
+						//Параметры договора  ------годовая ставка--------
+						Entity ContractParameterStavk = UserConnection.EntitySchemaManager.GetInstanceByName("ContractParameter").CreateEntity(UserConnection);
+									ContractParameterStavk.SetDefColumnValues();
+									ContractParameterStavk.SetColumnValue("Id", Guid.NewGuid());
+									ContractParameterStavk.SetColumnValue("ContractId", Id);
+									ContractParameterStavk.SetColumnValue("ParameterTypeId", ParameterTypeGodStavka);
+									ContractParameterStavk.SetColumnValue("FloatValue", GodStavka);
+									ContractParameterStavk.SetColumnValue("Value", GodStavka.ToString(ValString));
+									ContractParameterStavk.SetColumnValue("BankingServiceId", CodeProductGuid);
+
+						ContractParameterStavk.Save();
+							
+						//Параметры договора  ------Длительность месяцев--------
+						Entity ContractParameterDlit = UserConnection.EntitySchemaManager.GetInstanceByName("ContractParameter").CreateEntity(UserConnection);
+									ContractParameterDlit.SetDefColumnValues();
+									ContractParameterDlit.SetColumnValue("Id", Guid.NewGuid());
+									ContractParameterDlit.SetColumnValue("ContractId", Id);
+									ContractParameterDlit.SetColumnValue("ParameterTypeId", ParameterTypeDlitelMes);
+									ContractParameterDlit.SetColumnValue("IntegerValue", DlitMesContr);
+									ContractParameterDlit.SetColumnValue("Value", DlitMesContr.ToString(ValString2));
+									ContractParameterDlit.SetColumnValue("BankingServiceId", CodeProductGuid);
+
+						ContractParameterDlit.Save();			
+						
+						//Параметры договора  ------Сумма страховки--------
+						Entity ContractParameterInsur = UserConnection.EntitySchemaManager.GetInstanceByName("ContractParameter").CreateEntity(UserConnection);
+									ContractParameterInsur.SetDefColumnValues();
+									ContractParameterInsur.SetColumnValue("Id", Guid.NewGuid());
+									ContractParameterInsur.SetColumnValue("ContractId", Id);
+									ContractParameterInsur.SetColumnValue("ParameterTypeId", ParameterTypeInsurance);
+									ContractParameterInsur.SetColumnValue("FloatValue", sumInsurance);
+									ContractParameterInsur.SetColumnValue("Value", sumInsurance.ToString(ValString3));
+									ContractParameterInsur.SetColumnValue("BankingServiceId", CodeProductGuid);
+
+						ContractParameterInsur.Save();
+						
+						//Параметры договора  ------Валюта--------
+						Entity ContractParameterCur = UserConnection.EntitySchemaManager.GetInstanceByName("ContractParameter").CreateEntity(UserConnection);
+									ContractParameterCur.SetDefColumnValues();
+									ContractParameterCur.SetColumnValue("Id", Guid.NewGuid());
+									ContractParameterCur.SetColumnValue("ContractId", Id);
+									ContractParameterCur.SetColumnValue("ParameterTypeId", ParameterTypeCurrency);
+									ContractParameterCur.SetColumnValue("LookupValue", CurrencyCodeGuid);
+									ContractParameterCur.SetColumnValue("Value", CurString);
+									ContractParameterCur.SetColumnValue("BankingServiceId", CodeProductGuid);
+
+						ContractParameterCur.Save();	
+						
+						//Параметры договора  ------Сумма ежемесячного платежа--------
+						Entity ContractParameterSumMinPay = UserConnection.EntitySchemaManager.GetInstanceByName("ContractParameter").CreateEntity(UserConnection);
+									ContractParameterSumMinPay.SetDefColumnValues();
+									ContractParameterSumMinPay.SetColumnValue("Id", Guid.NewGuid());
+									ContractParameterSumMinPay.SetColumnValue("ContractId", Id);
+									ContractParameterSumMinPay.SetColumnValue("ParameterTypeId", ParameterTypeMinPay);
+									ContractParameterSumMinPay.SetColumnValue("FloatValue", MinMonthPay);
+									ContractParameterSumMinPay.SetColumnValue("Value", MinMonthPay.ToString(ValString4));
+									ContractParameterSumMinPay.SetColumnValue("BankingServiceId", CodeProductGuid);
+
+						ContractParameterSumMinPay.Save();
+						
+						//Параметры договора  ------Сумма кредита по контракту--------
+						Entity ContractParameterSumMinPay = UserConnection.EntitySchemaManager.GetInstanceByName("ContractParameter").CreateEntity(UserConnection);
+									ContractParameterSumMinPay.SetDefColumnValues();
+									ContractParameterSumMinPay.SetColumnValue("Id", Guid.NewGuid());
+									ContractParameterSumMinPay.SetColumnValue("ContractId", Id);
+									ContractParameterSumMinPay.SetColumnValue("ParameterTypeId", ParameterTypeSumma);
+									ContractParameterSumMinPay.SetColumnValue("FloatValue", SumCredit);
+									ContractParameterSumMinPay.SetColumnValue("Value", SumCredit.ToString(ValString5));
+									ContractParameterSumMinPay.SetColumnValue("BankingServiceId", CodeProductGuid);
+
+						ContractParameterSumMinPay.Save();
+						
+						//Банковский счет
+						Entity BankAccount = UserConnection.EntitySchemaManager.GetInstanceByName("BankAccount").CreateEntity(UserConnection);
+									BankAccount.SetDefColumnValues();
+									BankAccount.SetColumnValue("Id", Guid.NewGuid());
+									BankAccount.SetColumnValue("ContractId", Id);
+									BankAccount.SetColumnValue("IntegrationDiasoftClientExternalID", ExternalID);
+									BankAccount.SetColumnValue("ExternalID", DossierID);
+									BankAccount.SetColumnValue("BankAccountNumber", NumberExpenseDiasoft);
+									BankAccount.SetColumnValue("TypeId", BankAccTypeGuid);
+									BankAccount.SetColumnValue("StatusId", BankAccStatusGuid);
+									BankAccount.SetColumnValue("ContactId", ClientGuid);						
+									BankAccount.SetColumnValue("ProductId", CodeProductGuid);
+
+						BankAccount.Save();
+						
+						//Объект
+						Entity BankAccount = UserConnection.EntitySchemaManager.GetInstanceByName("BankAccount").CreateEntity(UserConnection);
+									BankAccount.SetDefColumnValues();
+									BankAccount.SetColumnValue("Id", Guid.NewGuid());
+									BankAccount.SetColumnValue("ContractId", Id);
+									BankAccount.SetColumnValue("IntegrationDiasoftClientExternalID", ExternalID);
+									BankAccount.SetColumnValue("ExternalID", DossierID);
+									BankAccount.SetColumnValue("BankAccountNumber", NumberExpenseDiasoft);
+									BankAccount.SetColumnValue("TypeId", BankAccTypeGuid);
+									BankAccount.SetColumnValue("StatusId", BankAccStatusGuid);
+									BankAccount.SetColumnValue("ContactId", ClientGuid);						
+									BankAccount.SetColumnValue("ProductId", CodeProductGuid);
+
+						BankAccount.Save();
+						
+					}//conn2	
+						}//while+
+				}//reader
+			}//select
+}//MainConect
+return true;
